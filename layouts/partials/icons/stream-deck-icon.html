@@ -1,0 +1,46 @@
+{{ $icon := .icon }}
+
+{{ if eq $icon "radio" }}
+<svg class="stream-deck-icon" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"></path>
+    <path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"></path>
+    <circle cx="12" cy="12" r="2"></circle>
+    <path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"></path>
+    <path d="M19.1 4.9C23 8.8 23 15.1 19.1 19"></path>
+</svg>
+{{ else if eq $icon "user-plus" }}
+<svg class="stream-deck-icon" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+    <circle cx="9" cy="7" r="4"></circle>
+    <line x1="19" x2="19" y1="8" y2="14"></line>
+    <line x1="22" x2="16" y1="11" y2="11"></line>
+</svg>
+{{ else if eq $icon "coins" }}
+<svg class="stream-deck-icon" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="8" cy="8" r="6"></circle>
+    <path d="M18.09 10.37A6 6 0 1 1 10.34 18"></path>
+    <path d="M7 6h1v4"></path>
+    <path d="m16.71 13.88.7.71-2.82 2.82"></path>
+</svg>
+{{ else if eq $icon "video" }}
+<svg class="stream-deck-icon" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="m22 8-6 4 6 4V8Z"></path>
+    <rect width="14" height="12" x="2" y="6" rx="2" ry="2"></rect>
+</svg>
+{{ else if eq $icon "mouse-pointer-click" }}
+<svg class="stream-deck-icon" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="m9 9 5 12 1.774-5.226L21 14 9 9z"></path>
+    <path d="m16.071 16.071 4.243 4.243"></path>
+    <path d="m7.188 2.239.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656-2.12 2.122"></path>
+</svg>
+{{ else if eq $icon "shield" }}
+<svg class="stream-deck-icon" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+</svg>
+{{ end }}

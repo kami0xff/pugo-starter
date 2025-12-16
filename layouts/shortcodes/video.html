@@ -1,0 +1,87 @@
+{{/*
+  Video Shortcode for Help Center Articles
+  
+  Usage:
+    {{< video src="tutorial.mp4" >}}
+    {{< video src="demo.mp4" caption="Watch how to complete the process" >}}
+    {{< video src="https://example.com/video.mp4" external="true" >}}
+    {{< video src="tutorial.mp4" poster="thumbnail.png" >}}
+    {{< video src="tutorial.mp4" autoplay="true" loop="true" muted="true" >}}
+  
+  The shortcode automatically:
+    1. Looks for videos in /videos/articles/{section}/{parent}/{slug}/
+    2. Supports external URLs with external="true"
+    3. Supports poster images, captions, autoplay, loop, muted
+*/}}
+
+{{- $src := .Get "src" -}}
+{{- $caption := .Get "caption" | default "" -}}
+{{- $poster := .Get "poster" | default "" -}}
+{{- $external := .Get "external" | default "false" -}}
+{{- $autoplay := .Get "autoplay" | default "false" -}}
+{{- $loop := .Get "loop" | default "false" -}}
+{{- $muted := .Get "muted" | default "false" -}}
+
+{{/* Build the video path based on current page location */}}
+{{- $section := .Page.Section -}}
+{{- $slug := .Page.File.ContentBaseName -}}
+
+{{/* Get parent folder name */}}
+{{- $parent := "" -}}
+{{- with .Page.CurrentSection -}}
+  {{- if and .File (ne .File.ContentBaseName "_index") -}}
+    {{- $parent = .File.ContentBaseName -}}
+  {{- else -}}
+    {{- $parent = .File.Dir | path.Base -}}
+  {{- end -}}
+{{- end -}}
+
+{{/* Construct the video path */}}
+{{- $videoPath := $src -}}
+{{- $posterPath := "" -}}
+
+{{- if ne $external "true" -}}
+  {{- $basePath := printf "/videos/articles/%s" $section -}}
+  {{- if $parent -}}
+    {{- $basePath = printf "%s/%s" $basePath $parent -}}
+  {{- end -}}
+  {{- if and $slug (ne $slug "_index") -}}
+    {{- $basePath = printf "%s/%s" $basePath $slug -}}
+  {{- end -}}
+  
+  {{/* For translated content */}}
+  {{- $lang := .Page.Lang -}}
+  {{- if ne $lang "en" -}}
+    {{- $basePath = replace $basePath "/videos/articles/" (printf "/videos/articles-%s/" $lang) -}}
+  {{- end -}}
+  
+  {{- $videoPath = printf "%s/%s" $basePath $src -}}
+  
+  {{/* Build poster path if provided */}}
+  {{- if $poster -}}
+    {{- $posterPath = printf "%s/%s" $basePath $poster -}}
+  {{- end -}}
+{{- else -}}
+  {{- $posterPath = $poster -}}
+{{- end -}}
+
+<figure class="article-video">
+  <div class="video-wrapper">
+    <video 
+      controls 
+      playsinline
+      preload="metadata"
+      {{ with $posterPath }}poster="{{ . }}"{{ end }}
+      {{ if eq $autoplay "true" }}autoplay{{ end }}
+      {{ if eq $loop "true" }}loop{{ end }}
+      {{ if eq $muted "true" }}muted{{ end }}
+    >
+      <source src="{{ $videoPath }}" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+  </div>
+  {{- with $caption -}}
+  <figcaption>{{ . }}</figcaption>
+  {{- end -}}
+</figure>
+

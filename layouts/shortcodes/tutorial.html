@@ -1,0 +1,51 @@
+{{/*
+  Tutorial Embed Shortcode
+  
+  Embed a video tutorial from the tutorials library into any article.
+  
+  Usage:
+    {{< tutorial title="Getting Started for New Users" >}}
+    {{< tutorial title="How to Set Up Your First Stream" >}}
+  
+  The shortcode looks up the tutorial by title from all_tutorials.yaml
+  and displays it as an inline video player.
+*/}}
+
+{{- $title := .Get "title" -}}
+{{- $tutorial := false -}}
+
+{{/* Find the tutorial by title */}}
+{{- range $.Site.Data.all_tutorials -}}
+  {{- if eq .title $title -}}
+    {{- $tutorial = . -}}
+  {{- end -}}
+{{- end -}}
+
+{{- if $tutorial -}}
+<div class="tutorial-embed">
+  <div class="tutorial-embed-header">
+    <div class="tutorial-embed-badge">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+      </svg>
+      Video Tutorial
+    </div>
+    <span class="tutorial-embed-duration">{{ $tutorial.duration }}</span>
+  </div>
+  <div class="tutorial-embed-video">
+    <video controls playsinline preload="metadata">
+      <source src="{{ $tutorial.video }}" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+  </div>
+  <div class="tutorial-embed-info">
+    <h4 class="tutorial-embed-title">{{ $tutorial.title }}</h4>
+    <p class="tutorial-embed-desc">{{ $tutorial.description }}</p>
+  </div>
+</div>
+{{- else -}}
+<div class="tutorial-embed tutorial-not-found">
+  <p>Tutorial "{{ $title }}" not found. Check the title matches exactly.</p>
+</div>
+{{- end -}}
+

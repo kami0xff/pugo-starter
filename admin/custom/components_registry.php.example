@@ -1,0 +1,98 @@
+<?php
+/**
+ * Custom Components Registry
+ * 
+ * Copy this file to components_registry.php and customize for your site.
+ * Each component maps to a YAML data file that powers a Hugo partial.
+ * 
+ * Available field types:
+ * - text: Single line text input
+ * - textarea: Multi-line text input
+ * - select: Dropdown with options
+ * - checkbox: Boolean toggle
+ * 
+ * Component options:
+ * - name: Display name in admin
+ * - description: What this component is for
+ * - icon: Icon name (zap, shield, help-circle, users, star, building, video)
+ * - color: Hex color for UI accents
+ * - file: YAML filename in data/ directory
+ * - template: Hugo partial that uses this data
+ * - supports_translations: If true, creates language-specific files (faqs_fr.yaml, etc.)
+ * - file_key: For grouped YAML files (e.g., topics.yaml with users/models/studios sections)
+ * - post_save: PHP function name to call after saving (for derivative files)
+ * - preview_template: How to render the live preview (faq, quickaccess, features, etc.)
+ */
+
+return [
+    'faqs' => [
+        'name' => 'FAQ',
+        'description' => 'Frequently asked questions',
+        'icon' => 'help-circle',
+        'color' => '#8b5cf6',
+        'file' => 'faqs.yaml',
+        'template' => 'partials/faq.html',
+        'supports_translations' => true,
+        'fields' => [
+            'question' => ['type' => 'text', 'label' => 'Question', 'required' => true],
+            'answer' => ['type' => 'textarea', 'label' => 'Answer', 'required' => true],
+        ],
+        'preview_template' => 'faq'
+    ],
+    
+    'quickaccess' => [
+        'name' => 'Quick Access',
+        'description' => 'Homepage quick access buttons',
+        'icon' => 'zap',
+        'color' => '#f59e0b',
+        'file' => 'quickaccess.yaml',
+        'template' => 'partials/quick-access.html',
+        'supports_translations' => false,
+        'fields' => [
+            'title' => ['type' => 'text', 'label' => 'Title', 'required' => true],
+            'icon' => ['type' => 'select', 'label' => 'Icon', 'required' => true, 'options' => [
+                'star' => 'Star', 
+                'heart' => 'Heart', 
+                'settings' => 'Settings', 
+                'help-circle' => 'Help',
+            ]],
+            'url' => ['type' => 'text', 'label' => 'URL', 'required' => true, 'placeholder' => '/section/page/'],
+        ],
+        'preview_template' => 'quickaccess'
+    ],
+    
+    'features' => [
+        'name' => 'Features',
+        'description' => 'Feature cards or highlights',
+        'icon' => 'star',
+        'color' => '#10b981',
+        'file' => 'features.yaml',
+        'template' => 'partials/features.html',
+        'supports_translations' => true,
+        'fields' => [
+            'title' => ['type' => 'text', 'label' => 'Title', 'required' => true],
+            'description' => ['type' => 'textarea', 'label' => 'Description', 'required' => true],
+            'icon' => ['type' => 'text', 'label' => 'Icon', 'placeholder' => 'star'],
+        ],
+        'preview_template' => 'features'
+    ],
+    
+    // Example of grouped component (multiple sections in one YAML file)
+    // 'topics_users' => [
+    //     'name' => 'Topics: Users',
+    //     'description' => 'Quick topics for the Users section',
+    //     'icon' => 'users',
+    //     'color' => '#3b82f6',
+    //     'file' => 'topics.yaml',
+    //     'file_key' => 'users',  // Key within the YAML file
+    //     'template' => 'partials/popular-topics.html',
+    //     'supports_translations' => true,
+    //     'fields' => [
+    //         'title' => ['type' => 'text', 'label' => 'Title', 'required' => true],
+    //         'desc' => ['type' => 'text', 'label' => 'Description', 'required' => true],
+    //         'url' => ['type' => 'text', 'label' => 'URL', 'required' => true],
+    //     ],
+    //     'preview_template' => 'topics'
+    // ],
+];
+

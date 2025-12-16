@@ -1,0 +1,280 @@
+{{/* Unified Sidebar Partial - Used for both sections and articles */}}
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-inner">
+    <!-- Category Switcher -->
+    <div class="sidebar-switcher">
+      <button class="sidebar-switcher-btn" id="categorySwitcher">
+        <span class="switcher-label">
+          {{ if eq .Section "users" }}For Users
+          {{ else if eq .Section "models" }}For Models
+          {{ else if eq .Section "studios" }}For Studios
+          {{ else if eq .Section "safety" }}Safety & Privacy
+          {{ else if eq .Section "guidelines" }}Community Guidelines
+          {{ else if eq .Section "troubleshooting" }}Troubleshooting
+          {{ else if eq .Section "scenarios" }}What To Do If...
+          {{ else }}Help Center{{ end }}
+        </span>
+        <svg class="switcher-chevron" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m6 9 6 6 6-6"/>
+        </svg>
+      </button>
+      <div class="sidebar-switcher-menu" id="categoryMenu">
+        <a href="{{ "users/" | relLangURL }}" class="switcher-option {{ if eq .Section "users" }}active{{ end }}">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+          </svg>
+          For Users
+        </a>
+        <a href="{{ "models/" | relLangURL }}" class="switcher-option {{ if eq .Section "models" }}active{{ end }}">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m22 8-6 4 6 4V8Z"></path>
+            <rect width="14" height="12" x="2" y="6" rx="2" ry="2"></rect>
+          </svg>
+          For Models
+        </a>
+        <a href="{{ "studios/" | relLangURL }}" class="switcher-option {{ if eq .Section "studios" }}active{{ end }}">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"></path>
+            <path d="m3 9 2.45-4.9A2 2 0 0 1 7.24 3h9.52a2 2 0 0 1 1.8 1.1L21 9"></path>
+            <path d="M12 3v6"></path>
+          </svg>
+          For Studios
+        </a>
+        <div class="switcher-divider"></div>
+        <a href="{{ "safety/" | relLangURL }}" class="switcher-option {{ if eq .Section "safety" }}active{{ end }}">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+          Safety & Privacy
+        </a>
+        <a href="{{ "guidelines/" | relLangURL }}" class="switcher-option {{ if eq .Section "guidelines" }}active{{ end }}">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
+            <path d="m9 12 2 2 4-4"/>
+          </svg>
+          Community Guidelines
+        </a>
+        <a href="{{ "troubleshooting/" | relLangURL }}" class="switcher-option {{ if eq .Section "troubleshooting" }}active{{ end }}">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+          </svg>
+          Troubleshooting
+        </a>
+        <a href="{{ "scenarios/" | relLangURL }}" class="switcher-option {{ if eq .Section "scenarios" }}active{{ end }}">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+            <path d="M12 17h.01"/>
+          </svg>
+          What To Do If...
+        </a>
+      </div>
+    </div>
+
+    <!-- Topic Groups with Collapsible Categories -->
+    <nav class="sidebar-nav">
+      {{ $currentSection := . }}
+      {{ $parentSection := .CurrentSection.Parent | default .CurrentSection | default . }}
+      {{ $currentPage := . }}
+      
+      {{/* For section pages, use .Sections directly */}}
+      {{ if .IsSection }}
+        {{ range $idx, $section := .Sections }}
+        {{ $groupId := printf "sidebar-group-%d" $idx }}
+        {{ $hasActivePage := false }}
+        {{ range .Pages }}
+          {{ if eq $currentPage.RelPermalink .RelPermalink }}{{ $hasActivePage = true }}{{ end }}
+        {{ end }}
+        <div class="sidebar-group" data-group-id="{{ $groupId }}">
+          <button class="sidebar-group-toggle{{ if $hasActivePage }} has-active{{ end }}" data-target="{{ $groupId }}" aria-expanded="true">
+            <span class="sidebar-group-title">{{ .Title }}</span>
+            <span class="sidebar-group-count">{{ len .Pages }}</span>
+            <svg class="sidebar-group-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m6 9 6 6 6-6"/>
+            </svg>
+          </button>
+          <ul class="sidebar-links" id="{{ $groupId }}">
+            {{ range .Pages }}
+            <li>
+              <a href="{{ .RelPermalink }}" class="sidebar-link{{ if eq $currentPage.RelPermalink .RelPermalink }} active{{ end }}">{{ .Title }}</a>
+            </li>
+            {{ end }}
+          </ul>
+        </div>
+        {{ end }}
+        
+        {{/* Direct pages under section */}}
+        {{ if .RegularPages }}
+        <div class="sidebar-group" data-group-id="sidebar-group-articles">
+          <button class="sidebar-group-toggle" data-target="sidebar-group-articles" aria-expanded="true">
+            <span class="sidebar-group-title">{{ if eq .Site.Language.Lang "fr" }}Articles{{ else }}Articles{{ end }}</span>
+            <span class="sidebar-group-count">{{ len .RegularPages }}</span>
+            <svg class="sidebar-group-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m6 9 6 6 6-6"/>
+            </svg>
+          </button>
+          <ul class="sidebar-links" id="sidebar-group-articles">
+            {{ range .RegularPages }}
+            <li>
+              <a href="{{ .RelPermalink }}" class="sidebar-link{{ if eq $currentPage.RelPermalink .RelPermalink }} active{{ end }}">{{ .Title }}</a>
+            </li>
+            {{ end }}
+          </ul>
+        </div>
+        {{ end }}
+      {{ else }}
+        {{/* For single pages, get sections from parent */}}
+        {{ with $parentSection }}
+          {{ range $idx, $section := .Sections }}
+          {{ $groupId := printf "sidebar-group-%d" $idx }}
+          {{ $hasActivePage := false }}
+          {{ range .Pages }}
+            {{ if eq $currentSection.RelPermalink .RelPermalink }}{{ $hasActivePage = true }}{{ end }}
+          {{ end }}
+          <div class="sidebar-group" data-group-id="{{ $groupId }}">
+            <button class="sidebar-group-toggle{{ if $hasActivePage }} has-active{{ end }}" data-target="{{ $groupId }}" aria-expanded="true">
+              <span class="sidebar-group-title">{{ .Title }}</span>
+              <span class="sidebar-group-count">{{ len .Pages }}</span>
+              <svg class="sidebar-group-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m6 9 6 6 6-6"/>
+              </svg>
+            </button>
+            <ul class="sidebar-links" id="{{ $groupId }}">
+              {{ range .Pages }}
+              <li>
+                <a href="{{ .RelPermalink }}" class="sidebar-link{{ if eq $currentSection.RelPermalink .RelPermalink }} active{{ end }}">{{ .Title }}</a>
+              </li>
+              {{ end }}
+            </ul>
+          </div>
+          {{ end }}
+        {{ end }}
+      {{ end }}
+    </nav>
+  </div>
+</aside>
+
+<style>
+/* Collapsible Sidebar Groups */
+.sidebar-group-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  margin-bottom: 0.25rem;
+  background: transparent;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: left;
+}
+
+.sidebar-group-toggle:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.sidebar-group-toggle .sidebar-group-title {
+  flex: 1;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #71717a;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-group-toggle:hover .sidebar-group-title {
+  color: #a1a1aa;
+}
+
+.sidebar-group-toggle.has-active .sidebar-group-title {
+  color: #ef4444;
+}
+
+.sidebar-group-count {
+  font-size: 0.625rem;
+  font-weight: 600;
+  color: #52525b;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  flex-shrink: 0;
+  min-width: 1.25rem;
+  text-align: center;
+}
+
+.sidebar-group-chevron {
+  color: #52525b;
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+
+.sidebar-group-toggle[aria-expanded="false"] .sidebar-group-chevron {
+  transform: rotate(-90deg);
+}
+
+.sidebar-group-toggle[aria-expanded="false"] + .sidebar-links {
+  display: none;
+}
+
+/* Adjust existing sidebar-links for animation */
+.sidebar-links {
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const sidebarGroups = document.querySelectorAll('.sidebar-group-toggle');
+  const storageKey = 'sidebar-collapsed-groups';
+  
+  // Load collapsed state from localStorage
+  let collapsedGroups = [];
+  try {
+    collapsedGroups = JSON.parse(localStorage.getItem(storageKey)) || [];
+  } catch (e) {
+    collapsedGroups = [];
+  }
+  
+  sidebarGroups.forEach(toggle => {
+    const targetId = toggle.dataset.target;
+    const targetList = document.getElementById(targetId);
+    
+    // Check if this group has an active page - if so, always expand it
+    const hasActive = toggle.classList.contains('has-active') || 
+                      (targetList && targetList.querySelector('.sidebar-link.active'));
+    
+    // Set initial state
+    if (collapsedGroups.includes(targetId) && !hasActive) {
+      toggle.setAttribute('aria-expanded', 'false');
+    }
+    
+    toggle.addEventListener('click', function() {
+      const isExpanded = this.getAttribute('aria-expanded') === 'true';
+      this.setAttribute('aria-expanded', !isExpanded);
+      
+      // Update localStorage
+      if (isExpanded) {
+        if (!collapsedGroups.includes(targetId)) {
+          collapsedGroups.push(targetId);
+        }
+      } else {
+        collapsedGroups = collapsedGroups.filter(id => id !== targetId);
+      }
+      
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(collapsedGroups));
+      } catch (e) {
+        // localStorage not available
+      }
+    });
+  });
+});
+</script>

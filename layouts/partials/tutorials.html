@@ -1,0 +1,33 @@
+<section class="tutorials-section">
+    <div class="container">
+        <div class="section-header">
+            <div>
+                <h2 class="section-title-left">Video Tutorials</h2>
+                <p class="section-subtitle">Step-by-step guides to help you master the platform.</p>
+            </div>
+            <a href="{{ "tutorials/" | relLangURL }}" class="view-all-link">
+                View all tutorials →
+            </a>
+        </div>
+
+        <div class="tutorials-grid">
+            {{ range first 4 $.Site.Data.tutorials }}
+            <button type="button" class="tutorial-card" data-video-url="{{ .video }}" data-video-title="{{ .title }}">
+                <div class="tutorial-thumbnail">
+                    <div class="play-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polygon points="10 8 16 12 10 16 10 8"></polygon>
+                        </svg>
+                    </div>
+                    <span class="duration-badge">{{ .duration }}</span>
+                </div>
+                <div class="tutorial-info">
+                    <h3 class="tutorial-title">{{ .title }}</h3>
+                </div>
+            </button>
+            {{ end }}
+        </div>
+    </div>
+</section>

@@ -1,0 +1,85 @@
+<section class="popular-topics-section">
+    <div class="container">
+        <h2 class="section-title">{{ if eq .Site.Language.Lang "fr" }}Sujets populaires{{ else }}Popular Topics{{ end }}</h2>
+
+        <div class="topics-grid">
+            <!-- Users Column -->
+            <div class="topics-column">
+                <h3 class="column-title">{{ if eq .Site.Language.Lang "fr" }}Pour les utilisateurs{{ else }}For Users{{ end }}</h3>
+                <div class="topics-list">
+                    {{ $topics := .Site.Data.topics }}
+                    {{ if .Site.Data.topics_fr }}
+                        {{ if eq .Site.Language.Lang "fr" }}
+                            {{ $topics = .Site.Data.topics_fr }}
+                        {{ end }}
+                    {{ end }}
+                    {{ range $topics.users }}
+                    <a href="{{ .url | relLangURL }}" class="topic-item">
+                        <h4 class="topic-title">{{ .title }}</h4>
+                        <p class="topic-desc">{{ .desc }}</p>
+                    </a>
+                    {{ end }}
+                </div>
+                <a href="{{ "users/" | relLangURL }}" class="column-link">
+                    {{ if eq $.Site.Language.Lang "fr" }}Voir la section Utilisateurs{{ else }}Go to User Section{{ end }}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m9 18 6-6-6-6" />
+                    </svg>
+                </a>
+            </div>
+
+            <!-- Models Column -->
+            <div class="topics-column">
+                <h3 class="column-title">{{ if eq .Site.Language.Lang "fr" }}Pour les modèles{{ else }}For Models{{ end }}</h3>
+                <div class="topics-list">
+                    {{ $topics := .Site.Data.topics }}
+                    {{ if .Site.Data.topics_fr }}
+                        {{ if eq .Site.Language.Lang "fr" }}
+                            {{ $topics = .Site.Data.topics_fr }}
+                        {{ end }}
+                    {{ end }}
+                    {{ range $topics.models }}
+                    <a href="{{ .url | relLangURL }}" class="topic-item">
+                        <h4 class="topic-title">{{ .title }}</h4>
+                        <p class="topic-desc">{{ .desc }}</p>
+                    </a>
+                    {{ end }}
+                </div>
+                <a href="{{ "models/" | relLangURL }}" class="column-link">
+                    {{ if eq $.Site.Language.Lang "fr" }}Voir la section Modèles{{ else }}Go to Models Section{{ end }}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m9 18 6-6-6-6" />
+                    </svg>
+                </a>
+            </div>
+
+            <!-- Studios Column -->
+            <div class="topics-column">
+                <h3 class="column-title">{{ if eq .Site.Language.Lang "fr" }}Pour les studios{{ else }}For Studios{{ end }}</h3>
+                <div class="topics-list">
+                    {{ $topics := .Site.Data.topics }}
+                    {{ if .Site.Data.topics_fr }}
+                        {{ if eq .Site.Language.Lang "fr" }}
+                            {{ $topics = .Site.Data.topics_fr }}
+                        {{ end }}
+                    {{ end }}
+                    {{ range $topics.studios }}
+                    <a href="{{ .url | relLangURL }}" class="topic-item">
+                        <h4 class="topic-title">{{ .title }}</h4>
+                        <p class="topic-desc">{{ .desc }}</p>
+                    </a>
+                    {{ end }}
+                </div>
+                <a href="{{ "studios/" | relLangURL }}" class="column-link">
+                    {{ if eq $.Site.Language.Lang "fr" }}Voir la section Studios{{ else }}Go to Studio Section{{ end }}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m9 18 6-6-6-6" />
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>

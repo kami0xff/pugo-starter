@@ -1,0 +1,161 @@
+{{ define "main" }}
+<div class="tags-page">
+  <a href="/" class="back-link">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="m15 18-6-6 6-6"/>
+    </svg>
+    Back to Help Center
+  </a>
+
+  <header class="tags-header">
+    <div class="tags-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/>
+        <path d="M7 7h.01"/>
+      </svg>
+    </div>
+    <h1 class="tags-title">All Tags</h1>
+    <p class="tags-subtitle">Browse articles by topic</p>
+  </header>
+
+  {{ if .Data.Terms }}
+  <div class="tags-grid">
+    {{ range .Data.Terms.Alphabetical }}
+    <a href="{{ .Page.RelPermalink }}" class="tag-card">
+      <span class="tag-name">{{ .Page.Title }}</span>
+      <span class="tag-count">{{ .Count }}</span>
+    </a>
+    {{ end }}
+  </div>
+  {{ else }}
+  <div class="empty-state">
+    <p>No tags found.</p>
+  </div>
+  {{ end }}
+</div>
+
+<style>
+  .tags-page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem;
+  }
+
+  .tags-header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .tags-icon {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 1rem;
+    padding: 0.75rem;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 0.75rem;
+    color: #ef4444;
+  }
+
+  .tags-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.02em;
+    color: #ffffff;
+  }
+
+  .tags-subtitle {
+    color: #71717a;
+    font-size: 1rem;
+  }
+
+  .tags-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+
+  .tag-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    background: #111113;
+    border: 1px solid #27272a;
+    border-radius: 0.75rem;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .tag-card:hover {
+    border-color: rgba(239, 68, 68, 0.4);
+    background: rgba(239, 68, 68, 0.05);
+    transform: translateY(-2px);
+  }
+
+  .tag-name {
+    font-weight: 500;
+    color: #ffffff;
+    transition: color 0.15s;
+  }
+
+  .tag-card:hover .tag-name {
+    color: #ef4444;
+  }
+
+  .tag-count {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 28px;
+    padding: 0 0.5rem;
+    background: #18181b;
+    border-radius: 9999px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: #71717a;
+  }
+
+  .tag-card:hover .tag-count {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #71717a;
+    text-decoration: none;
+    font-size: 0.875rem;
+    margin-bottom: 2rem;
+    transition: color 0.15s;
+  }
+
+  .back-link:hover {
+    color: #ffffff;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #71717a;
+  }
+
+  @media (max-width: 640px) {
+    .tags-title {
+      font-size: 1.75rem;
+    }
+    
+    .tags-page {
+      padding: 2rem 1rem;
+    }
+
+    .tags-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{{ end }}

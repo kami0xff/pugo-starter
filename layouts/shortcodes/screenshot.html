@@ -1,0 +1,73 @@
+{{/*
+  Screenshot Shortcode - For step-by-step UI screenshots
+  
+  Usage:
+    {{< screenshot src="signup-form.png" alt="The signup form" step="1" >}}
+    {{< screenshot src="click-verify.png" alt="Click verify button" step="2" highlight="top-right" >}}
+  
+  Features:
+    - Step number badge
+    - Optional highlight indicator position (top-left, top-right, center, etc.)
+    - Click to enlarge
+*/}}
+
+{{- $src := .Get "src" -}}
+{{- $alt := .Get "alt" | default "" -}}
+{{- $step := .Get "step" | default "" -}}
+{{- $highlight := .Get "highlight" | default "" -}}
+{{- $caption := .Get "caption" | default "" -}}
+
+{{/* Build the image path based on current page location */}}
+{{- $section := .Page.Section -}}
+{{- $slug := .Page.File.ContentBaseName -}}
+
+{{/* Get parent folder name */}}
+{{- $parent := "" -}}
+{{- with .Page.CurrentSection -}}
+  {{- if and .File (ne .File.ContentBaseName "_index") -}}
+    {{- $parent = .File.ContentBaseName -}}
+  {{- else -}}
+    {{- $parent = .File.Dir | path.Base -}}
+  {{- end -}}
+{{- end -}}
+
+{{/* Construct the image path: /images/articles/{section}/{parent}/{slug}/{src} */}}
+{{- $basePath := printf "/images/articles/%s" $section -}}
+{{- if $parent -}}
+  {{- $basePath = printf "%s/%s" $basePath $parent -}}
+{{- end -}}
+{{- if and $slug (ne $slug "_index") -}}
+  {{- $basePath = printf "%s/%s" $basePath $slug -}}
+{{- end -}}
+
+{{/* For translated content */}}
+{{- $lang := .Page.Lang -}}
+{{- if ne $lang "en" -}}
+  {{- $basePath = replace $basePath "/images/articles/" (printf "/images/articles-%s/" $lang) -}}
+{{- end -}}
+
+{{- $imgPath := printf "%s/%s" $basePath $src -}}
+
+<figure class="screenshot{{ with $highlight }} has-highlight highlight-{{ . }}{{ end }}">
+  {{- with $step -}}
+  <span class="screenshot-step">Step {{ . }}</span>
+  {{- end -}}
+  <a href="{{ $imgPath }}" class="image-lightbox" data-alt="{{ $alt }}">
+    <img 
+      src="{{ $imgPath }}" 
+      alt="{{ $alt }}"
+      loading="lazy"
+    >
+    <span class="image-zoom-hint">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <path d="m21 21-4.3-4.3"></path>
+        <path d="M11 8v6"></path>
+        <path d="M8 11h6"></path>
+      </svg>
+    </span>
+  </a>
+  {{- with $caption -}}
+  <figcaption>{{ . }}</figcaption>
+  {{- end -}}
+</figure>

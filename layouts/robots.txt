@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: {{ .Site.BaseURL }}sitemap.xml
+
+# Disallow admin/system paths if any
+Disallow: /admin/
+Disallow: /search/
+
+# Crawl delay (optional, be nice to servers)
+Crawl-delay: 1

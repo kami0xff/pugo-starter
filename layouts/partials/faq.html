@@ -1,0 +1,23 @@
+<section class="faq-section">
+    <div class="container-narrow">
+        <h2 class="section-title">Frequently Asked Questions</h2>
+
+        <div class="accordion">
+            {{ range $index, $faq := $.Site.Data.faqs }}
+            <div class="accordion-item">
+                <button class="accordion-trigger" aria-expanded="false" data-accordion="{{ $index }}">
+                    <span class="accordion-question">{{ .question }}</span>
+                    <svg class="accordion-chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="m6 9 6 6 6-6" />
+                    </svg>
+                </button>
+                <div class="accordion-content" id="faq-{{ $index }}" hidden>
+                    <p class="accordion-answer">{{ .answer }}</p>
+                </div>
+            </div>
+            {{ end }}
+        </div>
+    </div>
+</section>

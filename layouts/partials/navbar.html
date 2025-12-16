@@ -1,0 +1,94 @@
+<nav class="custom-navbar">
+    <div class="navbar-container">
+        <!-- Left: Logo + Nav Links -->
+        <div class="nav-left">
+            <a href="/" class="brand-logo" title="Xlovecam Help & Support Center">
+                Xlovecam <span class="brand-suffix">Help / Support</span>
+            </a>
+            <div class="nav-links">
+                {{ range .Site.Menus.main }}
+                <a href="{{ .URL | relLangURL }}" class="nav-link-item">{{ .Name }}</a>
+                {{ end }}
+            </div>
+        </div>
+
+        <!-- Center: Search (Desktop only) -->
+        <div class="nav-center">
+            <div class="navbar-search">
+                <div class="navbar-search-box">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.3-4.3"></path>
+                    </svg>
+                    <input type="text" id="navbarSearchInput" placeholder="{{ if eq .Site.Language.Lang "fr" }}Rechercher dans l'aide...{{ else if eq .Site.Language.Lang "nl" }}Zoeken in help...{{ else if eq .Site.Language.Lang "es" }}Buscar en ayuda...{{ else if eq .Site.Language.Lang "de" }}In Hilfe suchen...{{ else if eq .Site.Language.Lang "it" }}Cerca nell'aiuto...{{ else }}Search help articles...{{ end }}" autocomplete="off">
+                    <kbd>⌘K</kbd>
+                </div>
+                <div class="navbar-search-dropdown" id="navbarSearchResults"></div>
+            </div>
+        </div>
+
+        <!-- Right: Language + CTA + Mobile Menu -->
+        <div class="nav-right">
+            <!-- Language Selector -->
+            <div class="language-dropdown">
+                <button class="language-btn" id="langToggle">
+                    {{ .Site.Language.LanguageName }}
+                    <svg class="chevron-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="m6 9 6 6 6-6" />
+                    </svg>
+                </button>
+                <div class="language-menu" id="langMenu">
+                    {{ if .IsTranslated }}
+                        <a href="{{ .RelPermalink }}" class="language-option active">{{ .Site.Language.LanguageName }}</a>
+                        {{ range .Translations }}
+                        <a href="{{ .RelPermalink }}" class="language-option">{{ .Language.LanguageName }}</a>
+                        {{ end }}
+                    {{ else }}
+                        {{ range .Site.Languages }}
+                        <a href="/{{ if ne .Lang "en" }}{{ .Lang }}/{{ end }}" class="language-option{{ if eq .Lang $.Site.Language.Lang }} active{{ end }}">{{ .LanguageName }}</a>
+                        {{ end }}
+                    {{ end }}
+                </div>
+            </div>
+
+            <!-- Go to Xlovecam Button -->
+            <a href="https://xlovecam.com" target="_blank" rel="noopener" class="btn-primary-black">
+                Go to xlovecam
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                    <polyline points="15 3 21 3 21 9"></polyline>
+                    <line x1="10" x2="21" y1="14" y2="3"></line>
+                </svg>
+            </a>
+
+            <!-- Mobile Menu Button -->
+            <button class="mobile-menu-btn" aria-label="Menu" id="mobileMenuToggle">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="4" x2="20" y1="12" y2="12"></line>
+                    <line x1="4" x2="20" y1="6" y2="6"></line>
+                    <line x1="4" x2="20" y1="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        {{ range .Site.Menus.main }}
+        <a href="{{ .URL | relLangURL }}" class="mobile-menu-link">{{ .Name }}</a>
+        {{ end }}
+        <a href="https://xlovecam.com" target="_blank" rel="noopener" class="mobile-menu-link">
+            Go to xlovecam
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <line x1="10" x2="21" y1="14" y2="3"></line>
+            </svg>
+        </a>
+    </div>
+</nav>

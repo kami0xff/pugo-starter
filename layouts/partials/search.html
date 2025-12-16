@@ -1,0 +1,288 @@
+<!-- Search Modal (for ⌘K shortcut) -->
+<div id="searchModal" class="search-modal">
+    <div class="search-modal-backdrop" onclick="closeSearch()"></div>
+    <div class="search-modal-content">
+        <div class="search-modal-header">
+            <div class="search-modal-input-wrapper">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.3-4.3"></path>
+                </svg>
+                <input type="text" id="modalSearchInput" placeholder="{{ if eq .Site.Language.Lang "fr" }}Rechercher dans l'aide...{{ else }}Search help articles...{{ end }}" autocomplete="off">
+                <button class="search-modal-close" onclick="closeSearch()"><kbd>ESC</kbd></button>
+            </div>
+        </div>
+        <div class="search-modal-results" id="modalSearchResults">
+            <div class="search-empty">{{ if eq .Site.Language.Lang "fr" }}Tapez pour rechercher...{{ else }}Start typing to search...{{ end }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- Pagefind Scripts -->
+<link href="/pagefind/pagefind-ui.css" rel="stylesheet">
+<script src="/pagefind/pagefind-ui.js"></script>
+
+<script>
+(function() {
+    let pagefind = null;
+    const currentLang = '{{ .Site.Language.Lang }}';
+
+    // Initialize Pagefind
+    async function initPagefind() {
+        if (pagefind) return pagefind;
+        try {
+            pagefind = await import('/pagefind/pagefind.js');
+            await pagefind.options({ excerptLength: 20 });
+            return pagefind;
+        } catch (e) {
+            console.error('Pagefind not loaded:', e);
+            return null;
+        }
+    }
+
+    initPagefind();
+
+    // ========== MODAL FUNCTIONS ==========
+    const modal = document.getElementById('searchModal');
+    const modalInput = document.getElementById('modalSearchInput');
+    const modalResults = document.getElementById('modalSearchResults');
+
+    window.openSearch = function() {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        setTimeout(() => modalInput.focus(), 50);
+    };
+
+    window.closeSearch = function() {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+        modalInput.value = '';
+        modalResults.innerHTML = '<div class="search-empty">Start typing to search...</div>';
+    };
+
+    // ⌘K / Ctrl+K shortcut
+    document.addEventListener('keydown', function(e) {
+        if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+            e.preventDefault();
+            modal.classList.contains('active') ? closeSearch() : openSearch();
+        }
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+            closeSearch();
+        }
+    });
+
+    // ========== HELPER FUNCTIONS ==========
+    function parseUrl(url) {
+        // Extract section and category from URL
+        // Example: /users/getting-started/article-name/
+        const parts = url.replace(/^\/|\/$/g, '').split('/');
+        const section = parts[0] || '';
+        const category = parts[1] || '';
+        return { section, category, isArticle: parts.length > 2 };
+    }
+
+    function getSectionLabel(section) {
+        const labels = {
+            'users': '{{ if eq .Site.Language.Lang "fr" }}Utilisateurs{{ else }}Users{{ end }}',
+            'models': '{{ if eq .Site.Language.Lang "fr" }}Modèles{{ else }}Models{{ end }}',
+            'studios': 'Studios',
+            'fr': 'French',
+            'de': 'German',
+            'es': 'Spanish',
+            'it': 'Italian',
+            'nl': 'Dutch'
+        };
+        return labels[section] || section;
+    }
+
+    function formatCategory(category) {
+        if (!category) return '';
+        return category.split('-').map(word => 
+            word.charAt(0).toUpperCase() + word.slice(1)
+        ).join(' ');
+    }
+
+    function getSectionIcon(section) {
+        const icons = {
+            'users': `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
+            'models': `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3Z"/></svg>`,
+            'studios': `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"/><path d="m3 9 2.5-4.9A2 2 0 0 1 7.2 3h9.5a2 2 0 0 1 1.8 1.1L21 9"/></svg>`
+        };
+        return icons[section] || `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
+    }
+
+    // ========== INLINE SEARCH SETUP ==========
+    function setupInlineSearch(inputId, resultsId) {
+        const input = document.getElementById(inputId);
+        const results = document.getElementById(resultsId);
+        if (!input || !results) return;
+
+        let debounceTimer;
+        let selectedIndex = -1;
+
+        input.addEventListener('input', function() {
+            clearTimeout(debounceTimer);
+            const query = this.value.trim();
+            
+            if (query.length < 2) {
+                results.innerHTML = '';
+                results.classList.remove('active');
+                return;
+            }
+
+            debounceTimer = setTimeout(() => performSearch(query, results, false), 150);
+        });
+
+        input.addEventListener('focus', function() {
+            if (this.value.trim().length >= 2 && results.innerHTML) {
+                results.classList.add('active');
+            }
+        });
+
+        input.addEventListener('blur', function() {
+            setTimeout(() => results.classList.remove('active'), 200);
+        });
+
+        input.addEventListener('keydown', function(e) {
+            const items = results.querySelectorAll('.search-suggestion');
+            
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+                updateSelection(items, selectedIndex);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                selectedIndex = Math.max(selectedIndex - 1, -1);
+                updateSelection(items, selectedIndex);
+            } else if (e.key === 'Enter' && selectedIndex >= 0) {
+                e.preventDefault();
+                const link = items[selectedIndex]?.querySelector('a');
+                if (link) window.location.href = link.href;
+            } else if (e.key === 'Escape') {
+                input.blur();
+            }
+        });
+    }
+
+    function updateSelection(items, idx) {
+        items.forEach((item, i) => item.classList.toggle('selected', i === idx));
+    }
+
+    // ========== MODAL SEARCH SETUP ==========
+    let modalSelectedIndex = -1;
+
+    if (modalInput) {
+        let modalDebounce;
+        modalInput.addEventListener('input', function() {
+            clearTimeout(modalDebounce);
+            const query = this.value.trim();
+            
+            if (query.length < 2) {
+                modalResults.innerHTML = '<div class="search-empty">Start typing to search...</div>';
+                return;
+            }
+
+            modalDebounce = setTimeout(() => performSearch(query, modalResults, true), 150);
+        });
+
+        modalInput.addEventListener('keydown', function(e) {
+            const items = modalResults.querySelectorAll('.search-modal-item');
+            
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                modalSelectedIndex = Math.min(modalSelectedIndex + 1, items.length - 1);
+                updateSelection(items, modalSelectedIndex);
+                items[modalSelectedIndex]?.scrollIntoView({ block: 'nearest' });
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                modalSelectedIndex = Math.max(modalSelectedIndex - 1, -1);
+                updateSelection(items, modalSelectedIndex);
+            } else if (e.key === 'Enter' && modalSelectedIndex >= 0) {
+                e.preventDefault();
+                const link = items[modalSelectedIndex]?.querySelector('a');
+                if (link) window.location.href = link.href;
+            }
+        });
+    }
+
+    // ========== SEARCH FUNCTION ==========
+    async function performSearch(query, container, isModal) {
+        const pf = await initPagefind();
+        if (!pf) return;
+
+        try {
+            let search = await pf.search(query, { filters: { language: [currentLang] } });
+            if (search.results.length === 0) {
+                search = await pf.search(query);
+            }
+
+            if (search.results.length === 0) {
+                container.innerHTML = isModal 
+                    ? `<div class="search-empty">{{ if eq .Site.Language.Lang "fr" }}Aucun résultat pour{{ else }}No results for{{ end }} "${escapeHtml(query)}"</div>`
+                    : `<div class="search-no-results">{{ if eq .Site.Language.Lang "fr" }}Aucun résultat{{ else }}No results found{{ end }}</div>`;
+                if (!isModal) container.classList.add('active');
+                return;
+            }
+
+            const limit = isModal ? 8 : 5;
+            const resultsHtml = await Promise.all(
+                search.results.slice(0, limit).map(async (result) => {
+                    const data = await result.data();
+                    const { section, category, isArticle } = parseUrl(data.url);
+                    const sectionLabel = getSectionLabel(section);
+                    const categoryLabel = formatCategory(category);
+                    const icon = getSectionIcon(section);
+                    const typeLabel = isArticle ? '{{ if eq .Site.Language.Lang "fr" }}Article{{ else }}Article{{ end }}' : '{{ if eq .Site.Language.Lang "fr" }}Section{{ else }}Section{{ end }}';
+                    
+                    if (isModal) {
+                        return `
+                            <div class="search-modal-item">
+                                <a href="${data.url}">
+                                    <div class="modal-result-header">
+                                        <span class="modal-result-badge">${icon} ${sectionLabel}</span>
+                                        ${categoryLabel ? `<span class="modal-result-category">${categoryLabel}</span>` : ''}
+                                    </div>
+                                    <div class="modal-result-title">${data.meta?.title || 'Untitled'}</div>
+                                    <div class="modal-result-excerpt">${data.excerpt || ''}</div>
+                                </a>
+                            </div>
+                        `;
+                    } else {
+                        return `
+                            <div class="search-suggestion">
+                                <a href="${data.url}">
+                                    <div class="suggestion-header">
+                                        <span class="suggestion-badge">${icon}</span>
+                                        <span class="suggestion-type">${typeLabel}</span>
+                                        <span class="suggestion-section">${sectionLabel}${categoryLabel ? ' › ' + categoryLabel : ''}</span>
+                                    </div>
+                                    <div class="suggestion-title">${data.meta?.title || 'Untitled'}</div>
+                                    ${data.excerpt ? `<div class="suggestion-excerpt">${data.excerpt}</div>` : ''}
+                                </a>
+                            </div>
+                        `;
+                    }
+                })
+            );
+
+            container.innerHTML = resultsHtml.join('');
+            if (!isModal) container.classList.add('active');
+            if (isModal) modalSelectedIndex = -1;
+
+        } catch (e) {
+            console.error('Search error:', e);
+        }
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Initialize inline search
+    document.addEventListener('DOMContentLoaded', function() {
+        setupInlineSearch('navbarSearchInput', 'navbarSearchResults');
+    });
+})();
+</script>

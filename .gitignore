@@ -1,0 +1,30 @@
+# Hugo
+public/
+resources/_gen/
+.hugo_build.lock
+
+# Pugo
+admin/backups/
+admin/.pugo-version
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Dependencies
+node_modules/
+vendor/
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+

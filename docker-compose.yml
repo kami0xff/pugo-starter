@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  # Hugo static site server
+  hugo:
+    image: klakegg/hugo:ext-alpine
+    container_name: pugo-hugo
+    command: server --bind 0.0.0.0 --buildDrafts --buildFuture
+    volumes:
+      - .:/src
+    ports:
+      - "1313:1313"
+    working_dir: /src
+
+  # Pugo Admin Panel (PHP)
+  admin:
+    build:
+      context: ./admin
+      dockerfile: Dockerfile
+    container_name: pugo-admin
+    environment:
+      - HUGO_ROOT=/var/www/html
+    volumes:
+      - .:/var/www/html
+    ports:
+      - "8080:80"
+    depends_on:
+      - hugo

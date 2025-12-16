@@ -1,0 +1,22 @@
+# Pagefind Configuration
+# https://pagefind.app/docs/config-options/
+
+site: public
+output_path: public/pagefind
+
+# Exclude certain elements from indexing
+exclude_selectors:
+  - ".search-modal"
+  - ".custom-navbar"
+  - ".help-footer"
+  - "footer"
+  - "nav"
+  - ".article-feedback"
+  - ".contact-support"
+  - ".related-articles"
+  - ".article-toc"
+  - ".article-breadcrumbs"
+  - ".article-meta"
+
+# Keep index files small
+keep_index_url: false

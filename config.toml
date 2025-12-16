@@ -1,0 +1,69 @@
+# =============================================================================
+# PUGO STARTER - Hugo Configuration
+# =============================================================================
+
+baseURL = "http://localhost:1313/"
+languageCode = "en-us"
+title = "My Pugo Site"
+
+# Theme settings
+# theme = "your-theme"  # Uncomment if using an external theme
+
+# Build settings
+enableRobotsTXT = true
+enableGitInfo = true
+
+# Pagination
+paginate = 10
+
+# Taxonomies
+[taxonomies]
+  tag = "tags"
+  category = "categories"
+
+# Permalinks
+[permalinks]
+  posts = "/:section/:filename/"
+
+# Menu
+[menu]
+  [[menu.main]]
+    name = "Home"
+    url = "/"
+    weight = 1
+  [[menu.main]]
+    name = "Getting Started"
+    url = "/getting-started/"
+    weight = 2
+
+# Params
+[params]
+  description = "A site built with Pugo"
+  author = "Your Name"
+  
+  # Social links (optional)
+  # github = "https://github.com/yourusername"
+  # twitter = "https://twitter.com/yourusername"
+
+# Markup settings
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true  # Allow raw HTML in markdown
+  [markup.highlight]
+    style = "monokai"
+    lineNos = true
+    lineNumbersInTable = true
+
+# Output formats
+[outputs]
+  home = ["HTML", "RSS", "JSON"]
+  section = ["HTML", "RSS"]
+  taxonomy = ["HTML", "RSS"]
+  term = ["HTML", "RSS"]
+
+# JSON output for search
+[outputFormats.JSON]
+  mediaType = "application/json"
+  baseName = "index"
+  isPlainText = true

@@ -1,0 +1,12 @@
+<section class="quick-access-section">
+    <div class="container">
+        <div class="stream-deck-grid">
+            {{ range $.Site.Data.quickaccess }}
+            <a href="{{ .url | relLangURL }}" class="stream-deck-btn {{ .glow }}">
+                {{ partial "icons/stream-deck-icon.html" (dict "icon" .icon) }}
+                <span class="stream-deck-label">{{ .title }}</span>
+            </a>
+            {{ end }}
+        </div>
+    </div>
+</section>

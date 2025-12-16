@@ -1,0 +1,14 @@
+<section class="safety-section">
+    <div class="container">
+        <h2 class="section-title">Safety and Privacy</h2>
+
+        <div class="safety-grid">
+            {{ range $.Site.Data.safety }}
+            <a href="{{ .url | default "#" }}" class="safety-card">
+                <h3 class="safety-title">{{ .title }}</h3>
+                <p class="safety-desc">{{ .description }}</p>
+            </a>
+            {{ end }}
+        </div>
+    </div>
+</section>
