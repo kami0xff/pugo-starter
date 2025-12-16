@@ -1,0 +1,131 @@
+# =============================================================================
+# CI/CD DEPLOYMENT WORKFLOW
+# =============================================================================
+# Triggers on push to main branch:
+#   1. Builds Hugo site
+#   2. Runs Pagefind for search indexing
+#   3. Deploys to production server
+#
+# Required GitHub Secrets:
+#   - DEPLOY_HOST: Production server hostname/IP
+#   - DEPLOY_USER: SSH username
+#   - DEPLOY_KEY: SSH private key
+#   - DEPLOY_PATH: Path on server (e.g., /var/www/mysite)
+#
+# Or for Docker deployment:
+#   - DOCKER_REGISTRY: Registry URL (e.g., ghcr.io)
+#   - DOCKER_USERNAME: Registry username
+#   - DOCKER_PASSWORD: Registry password/token
+# =============================================================================
+
+name: Build & Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:  # Allow manual trigger
+
+env:
+  HUGO_VERSION: '0.139.5'
+  NODE_VERSION: '20'
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Build Hugo Site
+  # ---------------------------------------------------------------------------
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive  # Important: fetch pugo-core submodule
+          fetch-depth: 0         # Full history for .GitInfo
+
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: ${{ env.HUGO_VERSION }}
+          extended: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Build Hugo
+        run: hugo --minify --gc
+
+      - name: Build Pagefind Search Index
+        run: npx -y pagefind --site public
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: public
+          path: public/
+          retention-days: 1
+
+  # ---------------------------------------------------------------------------
+  # Deploy via rsync (Option A - Direct server deployment)
+  # ---------------------------------------------------------------------------
+  deploy-rsync:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: public
+          path: public/
+
+      - name: Deploy to server
+        uses: burnett01/rsync-deployments@6.0.0
+        with:
+          switches: -avzr --delete
+          path: public/
+          remote_path: ${{ secrets.DEPLOY_PATH }}
+          remote_host: ${{ secrets.DEPLOY_HOST }}
+          remote_user: ${{ secrets.DEPLOY_USER }}
+          remote_key: ${{ secrets.DEPLOY_KEY }}
+
+  # ---------------------------------------------------------------------------
+  # Deploy via Docker (Option B - Container deployment)
+  # ---------------------------------------------------------------------------
+  # Uncomment this section if you prefer Docker deployment
+  # 
+  # deploy-docker:
+  #   needs: build
+  #   runs-on: ubuntu-latest
+  #   if: github.ref == 'refs/heads/main'
+  #   
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+  #
+  #     - name: Download build artifact
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: public
+  #         path: public/
+  #
+  #     - name: Login to Container Registry
+  #       uses: docker/login-action@v3
+  #       with:
+  #         registry: ${{ secrets.DOCKER_REGISTRY }}
+  #         username: ${{ secrets.DOCKER_USERNAME }}
+  #         password: ${{ secrets.DOCKER_PASSWORD }}
+  #
+  #     - name: Build and push Docker image
+  #       uses: docker/build-push-action@v5
+  #       with:
+  #         context: .
+  #         file: Dockerfile.prod
+  #         push: true
+  #         tags: |
+  #           ${{ secrets.DOCKER_REGISTRY }}/${{ github.repository }}:latest
+  #           ${{ secrets.DOCKER_REGISTRY }}/${{ github.repository }}:${{ github.sha }}
+

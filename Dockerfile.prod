@@ -1,0 +1,37 @@
+# =============================================================================
+# PRODUCTION DOCKERFILE
+# =============================================================================
+# This creates a minimal nginx container serving pre-built static files.
+# 
+# The build happens in CI/CD, NOT in this Dockerfile.
+# CI/CD builds Hugo + Pagefind, then copies public/ into this image.
+#
+# Build: docker build -f Dockerfile.prod -t mysite:latest .
+# Run:   docker run -p 80:80 mysite:latest
+# =============================================================================
+
+FROM nginx:alpine
+
+# Install useful tools for debugging (optional, remove for smaller image)
+RUN apk add --no-cache curl
+
+# Copy production nginx config
+COPY nginx.prod.conf /etc/nginx/nginx.conf
+
+# Copy pre-built static files (built by CI/CD)
+# The public/ folder should exist after running: hugo --minify && npx pagefind
+COPY public/ /usr/share/nginx/html/
+
+# Security: remove default nginx files
+RUN rm -rf /usr/share/nginx/html/index.html 2>/dev/null || true
+
+# Expose port 80
+EXPOSE 80
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost/ || exit 1
+
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]
+

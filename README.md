@@ -13,48 +13,59 @@ Pugo is a PHP-based admin panel for Hugo static sites. It provides:
 - 🔍 **Search** - Pagefind integration
 - 🚀 **Git Publishing** - Push changes to trigger CI/CD
 
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     DEVELOPMENT                              │
+│  docker-compose up                                           │
+│  ┌─────────────────┐  ┌─────────────────┐                   │
+│  │   PHP Admin     │  │   Hugo Server   │                   │
+│  │   :8080         │  │   :1313         │                   │
+│  │   Edit content  │  │   Live preview  │                   │
+│  └─────────────────┘  └─────────────────┘                   │
+└─────────────────────────────────────────────────────────────┘
+                               │
+                               │ git push → CI/CD
+                               ↓
+┌─────────────────────────────────────────────────────────────┐
+│                     PRODUCTION                               │
+│  Static files only - No PHP, No Hugo                         │
+│  ┌─────────────────────────────────────┐                    │
+│  │         nginx:alpine                 │                    │
+│  │   Serves pre-built static files      │                    │
+│  └─────────────────────────────────────┘                    │
+└─────────────────────────────────────────────────────────────┘
+```
+
 ## Quick Start
 
-### Option 1: Docker (Recommended)
+### 1. Clone with Submodules
 
 ```bash
-# Clone this repository with submodules
-git clone --recursive https://github.com/your-org/pugo-starter.git my-site
+git clone --recursive https://github.com/kami0xff/pugo-starter.git my-site
 cd my-site
+```
 
-# Start with Docker
+### 2. Start Development Environment
+
+```bash
 docker-compose up -d
 
 # Access:
-# - Site: http://localhost:1313
-# - Admin: http://localhost:8080/admin/
+# - Hugo site (live reload): http://localhost:1313
+# - PHP Admin panel:         http://localhost:8080
 ```
 
-### Option 2: Local Development
-
-Requirements:
-- PHP 8.1+
-- Hugo (extended version recommended)
-- Pagefind (optional, for search)
+### 3. Set Up Your Own Repo
 
 ```bash
-# Clone this repository with submodules
-git clone --recursive https://github.com/your-org/pugo-starter.git my-site
-cd my-site
+# Remove starter origin
+git remote remove origin
 
-# Or if already cloned without --recursive:
-git submodule update --init
-
-# Start Hugo dev server
-hugo server -D
-
-# In another terminal, start PHP dev server for admin
-cd admin
-php -S localhost:8080
-
-# Access:
-# - Site: http://localhost:1313
-# - Admin: http://localhost:8080
+# Add your project's repo
+git remote add origin https://github.com/YOUR_USER/my-site.git
+git push -u origin main
 ```
 
 ## Default Credentials
@@ -71,63 +82,67 @@ my-site/
 ├── admin/                  # Pugo Admin Panel
 │   ├── core/              # Git submodule → pugo-core
 │   ├── content_types/     # Your content type definitions
-│   ├── custom/            # Your customizations (survives updates)
-│   └── config.php         # Your configuration (survives updates)
+│   ├── custom/            # Your customizations
+│   └── config.php         # Your configuration
 │
 ├── content/               # Hugo content (Markdown files)
-│   ├── _index.md         # Homepage
-│   └── getting-started/  # Example section
-│
 ├── layouts/               # Hugo templates
-│   ├── _default/         # Base templates
-│   ├── partials/         # Reusable components
-│   └── shortcodes/       # Custom shortcodes
-│
 ├── static/                # Static assets
-│   ├── css/
-│   ├── js/
-│   └── images/
-│
 ├── data/                  # Hugo data files
-├── config.toml            # Hugo configuration
-├── docker-compose.yml     # Docker setup
-└── README.md
+│
+├── docker-compose.yml     # Development: PHP + Hugo
+├── Dockerfile.prod        # Production: nginx only
+├── nginx.prod.conf        # Production nginx config
+└── .github/workflows/     # CI/CD pipeline
+```
+
+## Development Workflow
+
+1. **Edit content** via PHP admin at `localhost:8080`
+2. **Preview changes** live at `localhost:1313`
+3. **Commit and push** to trigger deployment
+4. **CI/CD builds** Hugo + Pagefind → deploys static files
+
+## Deployment
+
+### GitHub Actions (Included)
+
+The `.github/workflows/deploy.yml` handles:
+1. Build Hugo site
+2. Generate Pagefind search index
+3. Deploy to your server via rsync
+
+**Required GitHub Secrets:**
+- `DEPLOY_HOST` - Server hostname/IP
+- `DEPLOY_USER` - SSH username
+- `DEPLOY_KEY` - SSH private key
+- `DEPLOY_PATH` - Path on server (e.g., `/var/www/my-site`)
+
+### Manual Docker Deployment
+
+```bash
+# Build production image (after running hugo locally or in CI)
+hugo --minify
+npx pagefind --site public
+docker build -f Dockerfile.prod -t my-site:latest .
+
+# Run production container
+docker run -d -p 80:80 my-site:latest
 ```
 
 ## Customization
 
 ### Add Site Components
 
-Site Components let you manage YAML-driven sections like FAQs, Quick Access buttons, Features, etc.
+Manage YAML-driven sections like FAQs, Quick Access, Features:
 
-1. Copy `admin/custom/components_registry.php.example` to `admin/custom/components_registry.php`
-2. Define your components:
+1. Copy `admin/custom/components_registry.php.example` to `components_registry.php`
+2. Define your components
+3. Access via Admin → Site Components
 
-```php
-<?php
-return [
-    'faqs' => [
-        'name' => 'FAQ',
-        'description' => 'Frequently asked questions',
-        'icon' => 'help-circle',
-        'color' => '#8b5cf6',
-        'file' => 'faqs.yaml',
-        'supports_translations' => true,
-        'fields' => [
-            'question' => ['type' => 'text', 'label' => 'Question', 'required' => true],
-            'answer' => ['type' => 'textarea', 'label' => 'Answer', 'required' => true],
-        ],
-        'preview_template' => 'faq'
-    ],
-];
-```
+### Add Content Types
 
-3. Create corresponding Hugo partials to use the data
-4. Access via Admin → Site Components
-
-### Add a New Content Type
-
-1. Create `admin/content_types/my-type.php`:
+Create `admin/content_types/my-type.php`:
 
 ```php
 <?php
@@ -137,20 +152,8 @@ return [
     'sections' => ['my-section'],
     'fields' => [
         'title' => ['type' => 'text', 'required' => true],
-        'my_field' => ['type' => 'text', 'label' => 'My Custom Field'],
     ],
 ];
-```
-
-2. Create the Hugo layout `layouts/my-section/single.html`
-
-### Override Admin Views
-
-Create files in `admin/custom/views/` to override core views:
-
-```
-admin/custom/views/dashboard.view.php  # Custom dashboard
-admin/custom/views/edit.view.php       # Custom editor
 ```
 
 ### Add Languages
@@ -164,90 +167,27 @@ Edit `admin/config.php`:
 ],
 ```
 
-Then create `content.fr/` folder with translated content.
-
 ## Updating Pugo Core
 
-The `admin/core/` folder is a git submodule pointing to pugo-core. To update:
-
 ```bash
-# Pull latest pugo-core
 git submodule update --remote admin/core
-
-# Commit the update
 git add admin/core
 git commit -m "chore: update pugo-core"
 git push
 ```
 
-Your `config.php`, `content_types/`, and `custom/` folders are **never touched**.
-
 ## Contributing to Pugo Core
 
-If you fix a bug or add a feature in `admin/core/`, you can push it back:
+Changes in `admin/core/` can be pushed back:
 
 ```bash
 cd admin/core
-git add .
-git commit -m "fix: your improvement"
+git add . && git commit -m "fix: improvement"
 git push origin main
 
-# Then update your project's reference
 cd ../..
 git add admin/core
 git commit -m "chore: update pugo-core ref"
-```
-
-## Deployment
-
-### GitLab CI/CD
-
-1. Push your repo to GitLab
-2. Add `.gitlab-ci.yml`:
-
-```yaml
-stages:
-  - build
-  - deploy
-
-build:
-  stage: build
-  image: klakegg/hugo:ext-alpine
-  script:
-    - hugo --minify
-    - npx pagefind --site public
-  artifacts:
-    paths:
-      - public/
-
-deploy:
-  stage: deploy
-  script:
-    - rsync -avz public/ user@server:/var/www/my-site/
-```
-
-### GitHub Actions
-
-```yaml
-name: Deploy
-on:
-  push:
-    branches: [main]
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Setup Hugo
-        uses: peaceiris/actions-hugo@v2
-        with:
-          hugo-version: 'latest'
-          extended: true
-      - name: Build
-        run: hugo --minify
-      - name: Deploy
-        # Add your deployment step here
 ```
 
 ## License
@@ -257,4 +197,3 @@ MIT
 ---
 
 Made with ❤️ by Pugo
-

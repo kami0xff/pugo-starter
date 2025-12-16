@@ -1,28 +1,57 @@
 version: '3.8'
 
+# =============================================================================
+# DEVELOPMENT ENVIRONMENT
+# =============================================================================
+# Run with: docker-compose up -d
+# 
+# Access:
+#   - Hugo site:  http://localhost:1313 (live reload)
+#   - PHP Admin:  http://localhost:8080
+#
+# Workflow:
+#   1. Edit content via PHP admin (localhost:8080)
+#   2. See live preview on Hugo server (localhost:1313)
+#   3. Commit and push to trigger CI/CD deployment
+# =============================================================================
+
 services:
-  # Hugo static site server
+  # ---------------------------------------------------------------------------
+  # Hugo Development Server
+  # ---------------------------------------------------------------------------
+  # Provides live reload preview while editing
   hugo:
-    image: klakegg/hugo:ext-alpine
-    container_name: pugo-hugo
-    command: server --bind 0.0.0.0 --buildDrafts --buildFuture
+    image: hugomods/hugo:exts-0.139.5
+    container_name: ${COMPOSE_PROJECT_NAME:-pugo}-hugo
+    command: server --bind 0.0.0.0 --buildDrafts --buildFuture --disableFastRender
     volumes:
       - .:/src
     ports:
-      - "1313:1313"
+      - "${HUGO_PORT:-1313}:1313"
     working_dir: /src
-
-  # Pugo Admin Panel (PHP)
-  admin:
-    build:
-      context: ./admin
-      dockerfile: Dockerfile
-    container_name: pugo-admin
     environment:
-      - HUGO_ROOT=/var/www/html
+      - HUGO_ENV=development
+
+  # ---------------------------------------------------------------------------
+  # PHP Admin Panel
+  # ---------------------------------------------------------------------------
+  # Content management interface
+  admin:
+    image: php:8.2-apache
+    container_name: ${COMPOSE_PROJECT_NAME:-pugo}-admin
     volumes:
       - .:/var/www/html
     ports:
-      - "8080:80"
+      - "${ADMIN_PORT:-8080}:80"
+    working_dir: /var/www/html/admin
+    environment:
+      - HUGO_ROOT=/var/www/html
+      - APACHE_DOCUMENT_ROOT=/var/www/html/admin
+    command: >
+      bash -c "
+        a2enmod rewrite &&
+        sed -i 's|/var/www/html|/var/www/html/admin|g' /etc/apache2/sites-available/000-default.conf &&
+        apache2-foreground
+      "
     depends_on:
       - hugo
