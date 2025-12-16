@@ -18,8 +18,8 @@ Pugo is a PHP-based admin panel for Hugo static sites. It provides:
 ### Option 1: Docker (Recommended)
 
 ```bash
-# Clone this repository
-git clone https://github.com/your-org/pugo-starter.git my-site
+# Clone this repository with submodules
+git clone --recursive https://github.com/your-org/pugo-starter.git my-site
 cd my-site
 
 # Start with Docker
@@ -38,9 +38,12 @@ Requirements:
 - Pagefind (optional, for search)
 
 ```bash
-# Clone this repository
-git clone https://github.com/your-org/pugo-starter.git my-site
+# Clone this repository with submodules
+git clone --recursive https://github.com/your-org/pugo-starter.git my-site
 cd my-site
+
+# Or if already cloned without --recursive:
+git submodule update --init
 
 # Start Hugo dev server
 hugo server -D
@@ -66,11 +69,10 @@ php -S localhost:8080
 ```
 my-site/
 ├── admin/                  # Pugo Admin Panel
-│   ├── core/              # Updateable core (don't edit)
+│   ├── core/              # Git submodule → pugo-core
 │   ├── content_types/     # Your content type definitions
 │   ├── custom/            # Your customizations (survives updates)
-│   ├── config.php         # Your configuration (survives updates)
-│   └── pugo               # CLI tool
+│   └── config.php         # Your configuration (survives updates)
 │
 ├── content/               # Hugo content (Markdown files)
 │   ├── _index.md         # Homepage
@@ -164,16 +166,37 @@ Edit `admin/config.php`:
 
 Then create `content.fr/` folder with translated content.
 
-## Updating Pugo
+## Updating Pugo Core
 
-The `admin/core/` folder can be updated without affecting your customizations:
+The `admin/core/` folder is a git submodule pointing to pugo-core. To update:
 
 ```bash
-cd admin
-./pugo update
+# Pull latest pugo-core
+git submodule update --remote admin/core
+
+# Commit the update
+git add admin/core
+git commit -m "chore: update pugo-core"
+git push
 ```
 
 Your `config.php`, `content_types/`, and `custom/` folders are **never touched**.
+
+## Contributing to Pugo Core
+
+If you fix a bug or add a feature in `admin/core/`, you can push it back:
+
+```bash
+cd admin/core
+git add .
+git commit -m "fix: your improvement"
+git push origin main
+
+# Then update your project's reference
+cd ../..
+git add admin/core
+git commit -m "chore: update pugo-core ref"
+```
 
 ## Deployment
 

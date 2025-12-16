@@ -1,0 +1,3 @@
+[submodule "admin/core"]
+	path = admin/core
+	url = https://github.com/kami0xff/pugo-core.git
